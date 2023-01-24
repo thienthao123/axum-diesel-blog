@@ -6,6 +6,7 @@ use axum::{
 };
 
 use crate::{
+    auth::jwt::Claims,
     dto::post::{CreatePostDto, UpdatePostDto},
     model::{posts::UpdatePost, NewPost},
     AppError, AppState,
@@ -19,12 +20,13 @@ pub async fn find(State(app_sate): State<AppState>) -> anyhow::Result<Response, 
     Ok(Json(posts).into_response())
 }
 pub async fn create(
+    claims: Claims,
     State(app_state): State<AppState>,
     Json(payload): Json<CreatePostDto>,
 ) -> impl IntoResponse {
     let mut conn = app_state.pool.get().await.unwrap();
     let new_post = NewPost {
-        user_id: payload.user_id,
+        user_id: claims.user_id,
         title: payload.title,
         body: payload.body,
         published: payload.published,

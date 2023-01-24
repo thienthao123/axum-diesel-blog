@@ -10,6 +10,7 @@ use serde_json::json;
 use std::env;
 use std::net::SocketAddr;
 
+mod auth;
 mod controllers;
 mod dto;
 mod model;
