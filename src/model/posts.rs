@@ -1,9 +1,9 @@
-use chrono::NaiveDateTime;
-use diesel::{Associations, Identifiable, Insertable, Queryable};
-use serde::{Deserialize, Serialize};
-
 use crate::model::User;
 use crate::schema::posts;
+use chrono::NaiveDateTime;
+use diesel::prelude::*;
+use diesel::{AsChangeset, Associations, Identifiable, Insertable, Queryable};
+use serde::{Deserialize, Serialize};
 
 use super::Tag;
 
@@ -27,6 +27,14 @@ pub struct NewPost {
     pub title: String,
     pub body: String,
     pub published: bool,
+}
+
+#[derive(AsChangeset)]
+#[diesel(table_name = posts)]
+pub struct UpdatePost {
+    pub title: Option<String>,
+    pub body: Option<String>,
+    pub published: Option<bool>,
 }
 
 #[derive(Serialize)]

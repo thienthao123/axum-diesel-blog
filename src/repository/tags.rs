@@ -4,9 +4,9 @@ use diesel::{PgConnection, QueryDsl, RunQueryDsl};
 
 use diesel::prelude::*;
 
-pub struct Tags {}
+pub struct TagRepository;
 
-impl Tags {
+impl TagRepository {
     pub async fn create(conn: &mut PgConnection, new_tag: NewTag<'_>) -> Result<Tag> {
         let tag: Tag = diesel::insert_into(tags::table)
             .values(&new_tag)

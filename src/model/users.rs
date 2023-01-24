@@ -21,3 +21,16 @@ pub struct NewUser {
     pub username: String,
     pub hashed_password: String,
 }
+
+#[derive(Serialize)]
+pub struct UserPosts<T> {
+    #[serde(flatten)]
+    pub user: User,
+    pub posts: Vec<T>,
+}
+
+#[derive(Serialize)]
+pub struct UserLogin {
+    pub username: String,
+    pub password: String,
+}

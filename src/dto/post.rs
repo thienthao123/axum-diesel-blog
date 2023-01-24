@@ -9,9 +9,8 @@ pub struct CreatePostDto {
 }
 
 #[derive(Deserialize)]
-pub struct UpdatePostDto<'a> {
-    pub user_id: i32,
-    pub title: Option<&'a str>,
-    pub body: Option<&'a str>,
+pub struct UpdatePostDto {
+    pub title: Option<String>,
+    pub body: Option<String>,
     pub published: Option<bool>,
 }

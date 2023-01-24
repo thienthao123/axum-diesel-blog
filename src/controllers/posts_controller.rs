@@ -5,11 +5,17 @@ use axum::{
     Json,
 };
 
-use crate::{dto::post::CreatePostDto, model::NewPost, repository, AppError, AppState};
+use crate::{
+    dto::post::{CreatePostDto, UpdatePostDto},
+    model::{posts::UpdatePost, NewPost},
+    AppError, AppState,
+};
+
+use crate::repository::PostRepository;
 
 pub async fn find(State(app_sate): State<AppState>) -> anyhow::Result<Response, AppError> {
     let mut conn = app_sate.pool.get().await.unwrap();
-    let posts = repository::Posts::find(&mut conn)?;
+    let posts = PostRepository::find(&mut conn)?;
     Ok(Json(posts).into_response())
 }
 pub async fn create(
@@ -23,15 +29,30 @@ pub async fn create(
         body: payload.body,
         published: payload.published,
     };
-    let post = repository::Posts::create(&mut conn, new_post).unwrap();
+    let post = PostRepository::create(&mut conn, new_post).unwrap();
     (StatusCode::CREATED, Json(post))
 }
 
-pub async fn get_post(
+pub async fn find_one(
     State(app_state): State<AppState>,
     Path(id): Path<i32>,
 ) -> Result<Response, AppError> {
     let mut conn = app_state.pool.get().await.unwrap();
-    let result = repository::Posts::find_one(&mut conn, id)?;
+    let result = PostRepository::find_one(&mut conn, id)?;
     Ok(Json(result).into_response())
+}
+
+pub async fn update(
+    State(app_state): State<AppState>,
+    Path(id): Path<i32>,
+    Json(payload): Json<UpdatePostDto>,
+) -> Result<Response, AppError> {
+    let mut conn = app_state.pool.get().await?;
+    let update_post = UpdatePost {
+        title: payload.title,
+        body: payload.body,
+        published: payload.published,
+    };
+    let post = PostRepository::update(&mut conn, id, update_post)?;
+    Ok(Json(post).into_response())
 }

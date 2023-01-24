@@ -1,4 +1,4 @@
-use crate::model::posts::PostTags;
+use crate::model::posts::{PostTags, UpdatePost};
 use crate::model::{NewPost, Post, Tag};
 use crate::schema::posts;
 
@@ -7,9 +7,9 @@ use diesel::{PgConnection, RunQueryDsl};
 
 use diesel::prelude::*;
 
-pub struct Posts {}
+pub struct PostRepository {}
 
-impl Posts {
+impl PostRepository {
     pub fn find(conn: &mut PgConnection) -> Result<Vec<PostTags>> {
         let posts = posts::table.load::<Post>(conn)?;
         let post_tags = Self::get_tags_for_post(conn, posts);
@@ -33,6 +33,19 @@ impl Posts {
         let tags: Vec<Tag> = Tag::belonging_to(&post).load::<Tag>(conn)?;
         let post_tags = PostTags { post, tags };
         Ok(post_tags)
+    }
+
+    pub fn update(
+        conn: &mut PgConnection,
+        post_id: i32,
+        update_post: UpdatePost,
+    ) -> Result<PostTags> {
+        let post: Post = diesel::update(posts::table)
+            .filter(posts::id.eq(post_id))
+            .set(&update_post)
+            .get_result(conn)?;
+        let tags: Vec<Tag> = Tag::belonging_to(&post).load::<Tag>(conn)?;
+        Ok(PostTags { post, tags })
     }
 
     pub fn get_tags_for_post(conn: &mut PgConnection, posts: Vec<Post>) -> Result<Vec<PostTags>> {

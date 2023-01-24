@@ -4,11 +4,13 @@ use axum::{
     Json,
 };
 
-use crate::{dto::tag::CreateTagDto, model::NewTag, repository, AppError, AppState};
+use crate::repository::TagRepository;
+
+use crate::{dto::tag::CreateTagDto, model::NewTag, AppError, AppState};
 
 pub async fn find(State(app_state): State<AppState>) -> Result<Response, AppError> {
     let mut conn = app_state.pool.get().await.unwrap();
-    let tags = repository::Tags::find(&mut conn).await?;
+    let tags = TagRepository::find(&mut conn).await?;
     Ok(Json(tags).into_response())
 }
 
@@ -17,7 +19,7 @@ pub async fn find_one(
     Path(tag_id): Path<i32>,
 ) -> Result<Response, AppError> {
     let mut conn = app_state.pool.get().await?;
-    let tag = repository::Tags::find_one(&mut conn, tag_id).await?;
+    let tag = TagRepository::find_one(&mut conn, tag_id).await?;
     Ok(Json(tag).into_response())
 }
 
@@ -31,6 +33,6 @@ pub async fn create(
         slug: &payload.name.replace(" ", "-"),
         post_id: payload.post_id,
     };
-    let tag = repository::Tags::create(&mut conn, new_tag).await?;
+    let tag = TagRepository::create(&mut conn, new_tag).await?;
     Ok(Json(tag).into_response())
 }

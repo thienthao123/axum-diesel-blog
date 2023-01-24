@@ -1,21 +1,16 @@
 use crate::model::posts::PostTags;
+use crate::model::users::UserPosts;
 use crate::model::{NewUser, Post, User};
-use crate::repository;
 use crate::schema::users;
 use anyhow::{Ok, Result};
 use diesel::prelude::*;
 use diesel::{PgConnection, RunQueryDsl};
-use serde::{Deserialize, Serialize};
-pub struct Users;
 
-#[derive(Serialize)]
-pub struct UserPosts<T> {
-    #[serde(flatten)]
-    user: User,
-    posts: Vec<T>,
-}
+use super::PostRepository;
 
-impl Users {
+pub struct UserRepository;
+
+impl UserRepository {
     pub async fn find(conn: &mut PgConnection) -> Result<Vec<UserPosts<Post>>> {
         let results = users::table.load::<User>(conn).unwrap();
         let posts = Post::belonging_to(&results)
@@ -45,7 +40,7 @@ impl Users {
             .filter(users::id.eq(user_id))
             .get_result(conn)?;
         let posts: Vec<Post> = Post::belonging_to(&user).load::<Post>(conn)?;
-        let posts_tags = repository::Posts::get_tags_for_post(conn, posts)?;
+        let posts_tags = PostRepository::get_tags_for_post(conn, posts)?;
         let user_posts = UserPosts::<PostTags> {
             user,
             posts: posts_tags,
